@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using PruebaTecnicaPlatec.Infrastructure;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 

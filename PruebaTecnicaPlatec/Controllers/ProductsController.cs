@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PruebaTecnicaPlatec.Domain.DTOs;
 using PruebaTecnicaPlatec.Domain.Entidades;
 using PruebaTecnicaPlatec.Infrastructure;
@@ -18,25 +18,25 @@ namespace PruebaTecnicaPlatec.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> GetAll()
+        public async Task<ActionResult<IEnumerable<Product>>> GetAll()
         {
-            return Ok(_context.Products.ToList());
+            return Ok(await _context.Products.ToListAsync());
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Product> GetById(int id)
+        public async Task<ActionResult<Product>> GetById(int id)
         {
-            var product = _context.Products.Find(id);
+            var product = await _context.Products.FindAsync(id);
             return product == null ? NotFound() : Ok(product);
         }
 
         [HttpPost]
-        public ActionResult<Product> Create(ProductDto dto)
+        public async Task<ActionResult<Product>> Create(ProductDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Name) || dto.Price <= 0 || dto.Quantity <= 0)
                 return BadRequest("Datos inválidos");
 
-            var product = new Product
+            Product product = new Product
             {
                 Name = dto.Name,
                 Price = dto.Price,
@@ -44,15 +44,15 @@ namespace PruebaTecnicaPlatec.Controllers
             };
 
             _context.Products.Add(product);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, ProductDto dto)
+        public async Task<IActionResult> Update(int id, ProductDto dto)
         {
-            var product = _context.Products.Find(id);
+            var product = await _context.Products.FindAsync(id);
             if (product == null) return NotFound();
 
             if (string.IsNullOrWhiteSpace(dto.Name) || dto.Price <= 0 || dto.Quantity <= 0)
@@ -62,18 +62,18 @@ namespace PruebaTecnicaPlatec.Controllers
             product.Price = dto.Price;
             product.Quantity = dto.Quantity;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Ok(product);
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var product = _context.Products.Find(id);
+            var product = await _context.Products.FindAsync(id);
             if (product == null) return NotFound();
 
             _context.Products.Remove(product);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return NoContent();
         }
     }

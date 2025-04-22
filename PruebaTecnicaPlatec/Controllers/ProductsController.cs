@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PruebaTecnicaPlatec.Domain.DTOs;
 using PruebaTecnicaPlatec.Domain.Entidades;
 using PruebaTecnicaPlatec.Infrastructure;
+using PruebaTecnicaPlatec.Infrastructure.Interface;
 
 namespace PruebaTecnicaPlatec.Controllers
 {
@@ -11,10 +12,12 @@ namespace PruebaTecnicaPlatec.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ICreateService _createService;
 
-        public ProductsController(AppDbContext context)
+        public ProductsController(AppDbContext context, ICreateService createService)
         {
             _context = context;
+            _createService = createService;
         }
 
         [HttpGet]
@@ -36,17 +39,12 @@ namespace PruebaTecnicaPlatec.Controllers
             if (string.IsNullOrWhiteSpace(dto.Name) || dto.Price <= 0 || dto.Quantity <= 0)
                 return BadRequest("Datos inválidos");
 
-            Product product = new Product
-            {
-                Name = dto.Name,
-                Price = dto.Price,
-                Quantity = dto.Quantity
-            };
+            bool success = await _createService.Create(dto);
 
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+            if (!success)
+                return BadRequest("No se pudo guardar el producto. Verifica los datos ingresados.");
 
-            return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+            return Ok("Producto creado exitosamente.");
         }
 
         [HttpPut("{id}")]

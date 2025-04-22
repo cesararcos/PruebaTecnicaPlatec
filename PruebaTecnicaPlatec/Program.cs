@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PruebaTecnicaPlatec.Infrastructure;
+using PruebaTecnicaPlatec.Infrastructure.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseInMemoryDatabase("ProductsDb"));
+
+builder.Services.AddScoped<ICreateService, CreateService>();
 
 var app = builder.Build();
 
